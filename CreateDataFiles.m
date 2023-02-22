@@ -1,12 +1,12 @@
-function CreateDataFiles(filename)
+function CreateDataFiles(filename, savelocation)
 
 textfilename = strcat(filename,'.txt');
-GPSfilename = strcat(filename, 'GPS.csv');
-accelfilename = strcat(filename, 'Accel.csv');
-magfilename = strcat(filename, 'Mag.csv');
-gyrofilename = strcat(filename, 'Gyro.csv');
-orientationfilename = strcat(filename, 'Orientation.csv');
-combinedfilename = strcat(filename, '.xlsx');
+GPSfilename = strcat(savelocation, filename, 'GPS.csv');
+accelfilename = strcat(savelocation, filename, 'Accel.csv');
+magfilename = strcat(savelocation, filename, 'Mag.csv');
+gyrofilename = strcat(savelocation, filename, 'Gyro.csv');
+orientationfilename = strcat(savelocation, filename, 'Orientation.csv');
+combinedfilename = strcat(savelocation, filename, '.xlsx');
 
 textfile = fopen(textfilename,'r');
 GPSfile = fopen(GPSfilename,'w');
