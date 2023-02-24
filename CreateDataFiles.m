@@ -1,6 +1,6 @@
-function CreateDataFiles(filename, savelocation)
+function CreateDataFiles(homelocation, filename, savelocation)
 
-textfilename = strcat(filename,'.txt');
+textfilename = strcat(homelocation,filename,'.txt');
 GPSfilename = strcat(savelocation, filename, 'GPS.csv');
 accelfilename = strcat(savelocation, filename, 'Accel.csv');
 magfilename = strcat(savelocation, filename, 'Mag.csv');

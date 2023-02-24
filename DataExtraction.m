@@ -19,7 +19,7 @@ end
 % Create seperate GPS and IMU data files from each data file
 
 for i = 1:numel(filenames)
-    CreateDataFiles(filenames{i}, 'Data/Parsed/');
+    CreateDataFiles('Data/Sorted/',filenames{i}, 'Data/Parsed/');
 end
 
 % Extract GPS data from each .csv file
