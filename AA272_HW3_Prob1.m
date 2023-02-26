@@ -173,7 +173,8 @@ function clock_error = get_clock_error(ephem, tx_time)
     M_k = M_0 + n*t_k;
     E_k = NewtonRaphson_Eccen(M_k, e);
 
-    deltat_r = F*e^(sqrt_a)*sin(E_k);
+    %deltat_r = F*e^(sqrt_a)*sin(E_k);
+    deltat_r = F*e*(sqrt_a)*sin(E_k);
 
     deltat_sv = af0 + af1*(t - t_oc) + af2*(t - t_oc)^2 + deltat_r - TGD;
 
