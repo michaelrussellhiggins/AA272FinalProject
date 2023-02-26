@@ -2,6 +2,6 @@
 
 *.autosave
 
-*.csv
+#*.csv
 
-*.xlsx
+#*.xlsx
