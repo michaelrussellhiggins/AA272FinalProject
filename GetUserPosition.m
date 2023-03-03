@@ -55,7 +55,12 @@ while start_index <= numData
     
 end
 
-PositionData = table(["utc", "X", "Y", "Z"], utc(2:end), x0(2:end,1)', x0(2:end,2)', x0(2:end,3)');
+utc = utc(2:end)';
+X = x0(2:end,1);
+Y = x0(2:end,2);
+Z = x0(2:end,3);
+
+PositionData = table(utc, X, Y, Z);
 
 writetable(PositionData, strcat('Data/GPSPositionData/', gpsfile))
 
