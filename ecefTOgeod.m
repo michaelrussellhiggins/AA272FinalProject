@@ -11,7 +11,7 @@ function [lat_gd, lon_gd, h_gd] = ecefTOgeod(r_ecef)
     y = r_ecef(2);
     z = r_ecef(3);
     
-    r_E = 6378e3; % km
+    r_E = 6378e3; % m
     r_geoc = sqrt(x^2 + y^2 + z^2);
     h_gc = r_geoc - r_E;
     lon_gc = atan2d(y,x);

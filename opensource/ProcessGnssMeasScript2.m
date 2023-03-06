@@ -1,8 +1,17 @@
 %ProcessGnssMeasScript.m, script to read GnssLogger output, compute and plot:
 % pseudoranges, C/No, and weighted least squares PVT solution
 %
+close all
+clear
+clc
+%%
+gpsfiles = dir('../Data/Sorted/*.txt');
+
+gpsfilenames = {gpsfiles.name};
+
+for i = 1:length(gpsfilenames)
 % you can run the data in pseudoranges log files provided for you: 
-prFileName = 'DefenderDrag1aInside.txt'; %with duty cycling, no carrier phase
+prFileName = gpsfilenames{i}; %with duty cycling, no carrier phase
 % prFileName = 'pseudoranges_log_2016_08_22_14_45_50.txt'; %no duty cycling, with carrier phase
 % as follows
 % 1) copy everything from GitHub google/gps-measurement-tools/ to 
@@ -11,11 +20,20 @@ prFileName = 'DefenderDrag1aInside.txt'; %with duty cycling, no carrier phase
 dirName = '../Data/Sorted/';
 % 3) run ProcessGnssMeasScript.m script file 
 param.llaTrueDegDegM = [];
-
+loc = 0;
+loc_char = prFileName(9:11);
+if (strcmp(loc_char,'Out') == 1) || (strcmp(loc_char,'Dra') == 1)
+    loc = 1;
+elseif (strcmp(loc_char,'Cur') == 1) || (strcmp(loc_char,'Fly') == 1)
+    loc = 2;
+elseif (strcmp(loc_char,'Cor') == 1) || (strcmp(loc_char,'Pos') == 1)
+    loc = 3;
+end
 %Author: Frank van Diggelen
 %Open Source code for processing Android GNSS Measurements
 
 %% data
+
 %To add your own data:
 % save data from GnssLogger App, and edit dirName and prFileName appropriately
 %dirName = 'put the full path for your directory here';
@@ -24,7 +42,7 @@ param.llaTrueDegDegM = [];
 %% parameters
 %param.llaTrueDegDegM = [];
 %enter true WGS84 lla, if you know it:
-param.llaTrueDegDegM = [37.422578, -122.081678, -28];%Charleston Park Test Site
+%param.llaTrueDegDegM = [37.422578, -122.081678, -28];%Charleston Park Test Site
 
 %% Set the data filter and Read log file
 dataFilter = SetDataFilter;
@@ -41,32 +59,49 @@ if isempty(allGpsEph), return, end
 [gnssMeas] = ProcessGnssMeas(gnssRaw);
 
 %% plot pseudoranges and pseudorange rates
-h1 = figure;
-[colors] = PlotPseudoranges(gnssMeas,prFileName);
-h2 = figure;
-PlotPseudorangeRates(gnssMeas,prFileName,colors);
-h3 = figure;
-PlotCno(gnssMeas,prFileName,colors);
+% h1 = figure;
+% [colors] = PlotPseudoranges(gnssMeas,prFileName);
+% h2 = figure;
+% PlotPseudorangeRates(gnssMeas,prFileName,colors);
+% h3 = figure;
+% PlotCno(gnssMeas,prFileName,colors);
 
 %% compute WLS position and velocity
-gpsPvt = GpsWlsPvt(gnssMeas,allGpsEph);
+gpsPvt = GpsWlsPvt2(gnssMeas,allGpsEph);
 
+%% write csv files
+pos = gpsPvt.allECEF;
+lla = gpsPvt.allLlaDegDegM;
+enu = zeros(length(pos),3);
+for j = 1:length(pos)
+    r_ecef = pos(j,:);
+    enu(j,:) = (ecefTOenu(r_ecef',loc))';
+end
+
+user_pos_mat = [pos lla enu];
+user_pos_tab = array2table(user_pos_mat,...
+    'VariableNames',{'X','Y','Z','lat','lon','h','E','N','U'});
+
+writefile = ['../Data/GPSPosition2/',prFileName(1:end-4),'.csv'];
+writetable(user_pos_tab,writefile)
+
+end
 %% plot Pvt results
-h4 = figure;
-ts = 'Raw Pseudoranges, Weighted Least Squares solution';
-PlotPvt(gpsPvt,prFileName,param.llaTrueDegDegM,ts); drawnow;
-h5 = figure;
-PlotPvtStates(gpsPvt,prFileName);
+% h4 = figure;
+% ts = 'Raw Pseudoranges, Weighted Least Squares solution';
+% PlotPvt(gpsPvt,prFileName,param.llaTrueDegDegM,ts); drawnow;
+% h5 = figure;
+% PlotPvtStates(gpsPvt,prFileName);
 
 %% Plot Accumulated Delta Range 
-if any(any(isfinite(gnssMeas.AdrM) & gnssMeas.AdrM~=0))
-    [gnssMeas]= ProcessAdr(gnssMeas);
-    h6 = figure;
-    PlotAdr(gnssMeas,prFileName,colors);
-    [adrResid]= GpsAdrResiduals(gnssMeas,allGpsEph,param.llaTrueDegDegM);drawnow
-    h7 = figure;
-    PlotAdrResids(adrResid,gnssMeas,prFileName,colors);
-end
+% if any(any(isfinite(gnssMeas.AdrM) & gnssMeas.AdrM~=0))
+%     [gnssMeas]= ProcessAdr(gnssMeas);
+%     h6 = figure;
+%     PlotAdr(gnssMeas,prFileName,colors);
+%     [adrResid]= GpsAdrResiduals(gnssMeas,allGpsEph,param.llaTrueDegDegM);drawnow
+%     h7 = figure;
+%     PlotAdrResids(adrResid,gnssMeas,prFileName,colors);
+% end
 %% end of ProcessGnssMeasScript
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright 2016 Google Inc.
