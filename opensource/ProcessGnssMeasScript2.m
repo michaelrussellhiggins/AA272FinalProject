@@ -5,7 +5,7 @@ close all
 clear
 clc
 %%
-gpsfiles = dir('../Data/Sorted/*.txt');
+gpsfiles = dir('Data/Sorted/*.txt');
 
 gpsfilenames = {gpsfiles.name};
 
@@ -17,7 +17,7 @@ prFileName = gpsfilenames{i}; %with duty cycling, no carrier phase
 % 1) copy everything from GitHub google/gps-measurement-tools/ to 
 %    a local directory on your machine
 % 2) change 'dirName = ...' to match the local directory you are using:
-dirName = '../Data/Sorted/';
+dirName = 'Data/Sorted/';
 % 3) run ProcessGnssMeasScript.m script file 
 param.llaTrueDegDegM = [];
 loc = 0;
@@ -52,7 +52,7 @@ if isempty(gnssRaw), return, end
 %% Get online ephemeris from Nasa ftp, first compute UTC Time from gnssRaw:
 fctSeconds = 1e-3*double(gnssRaw.allRxMillis(end));
 utcTime = Gps2Utc([],fctSeconds);
-allGpsEph = GetNasaHourlyEphemeris(utcTime,dirName);
+allGpsEph = GetNasaHourlyEphemeris(utcTime,'Ephem');
 if isempty(allGpsEph), return, end
 
 %% process raw measurements, compute pseudoranges:
@@ -70,6 +70,7 @@ if isempty(allGpsEph), return, end
 gpsPvt = GpsWlsPvt2(gnssMeas,allGpsEph);
 
 %% write csv files
+utc = gnssMeas.utc(:,1);
 pos = gpsPvt.allECEF;
 lla = gpsPvt.allLlaDegDegM;
 enu = zeros(length(pos),3);
@@ -78,11 +79,11 @@ for j = 1:length(pos)
     enu(j,:) = (ecefTOenu(r_ecef',loc))';
 end
 
-user_pos_mat = [pos lla enu];
+user_pos_mat = [utc pos lla enu];
 user_pos_tab = array2table(user_pos_mat,...
-    'VariableNames',{'X','Y','Z','lat','lon','h','E','N','U'});
+    'VariableNames',{'utc','X','Y','Z','lat','lon','h','E','N','U'});
 
-writefile = ['../Data/GPSPosition2/',prFileName(1:end-4),'.csv'];
+writefile = ['Data/GPSPositionDirect/',prFileName(1:end-4),'.csv'];
 writetable(user_pos_tab,writefile)
 
 end

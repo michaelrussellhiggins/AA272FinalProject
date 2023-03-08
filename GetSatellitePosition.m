@@ -29,7 +29,7 @@ for i = 1:numData
 
     allRxMillis = int64(data{i,2} - data{i,5})*1e-6;
     fctSeconds = 1e-3*double(allRxMillis);
-    [gpsEph,iSv] = ClosestGpsEph(allGpsEph, data{i,11},fctSeconds);
+    [gpsEph,iSv] = ClosestGpsEph(allGpsEph, data{i,11}, fctSeconds);
     tx_time = data{i,14}/1e9;
     sat_pos = get_sat_ECEF(gpsEph, tx_time);
     B = get_clock_error(gpsEph, tx_time);
@@ -55,16 +55,16 @@ function clock_error = get_clock_error(ephem, tx_time)
 
     % Ephemeris data extraction
 
-    af0 = gpsEph.af0;
-    af1 = gpsEph.af1;
-    af2 = gpsEph.af2;
-    deltan = gpsEph.Delta_n;
-    M_0 = gpsEph.M0;
-    e = gpsEph.e;
-    sqrt_a = gpsEph.Asqrt;
-    t_oe = gpsEph.Toe;
-    TGD = gpsEph.TGD;
-    t_oc = gpsEph.Toc;
+    af0 = ephem.af0;
+    af1 = ephem.af1;
+    af2 = ephem.af2;
+    deltan = ephem.Delta_n;
+    M_0 = ephem.M0;
+    e = ephem.e;
+    sqrt_a = ephem.Asqrt;
+    t_oe = ephem.Toe;
+    TGD = ephem.TGD;
+    t_oc = ephem.Toc;
 
     t = tx_time;
 
@@ -95,22 +95,22 @@ function sat_pos = get_sat_ECEF(ephem, tx_time)
 
     % Ephemeris data extraction
 
-    C_rs = gpsEph.Crs;
-    deltan = gpsEph.Delta_n;
-    M_0 = gpsEph.M0;
-    C_uc = gpsEph.Cuc;
-    e = gpsEph.e;
-    C_us = gpsEph.Cus;
-    sqrt_a = gpsEph.Asqrt;
-    t_oe = gpsEph.Toe;
-    C_ic = gpsEph.Cic;
-    Omega_0 = gpsEph.OMEGA;
-    C_is =gpsEph.Cis;
-    i_0 = gpsEph.i0;
-    C_rc = gpsEph.Crc;
-    omega = gpsEph.omega;
-    Omegadot = gpsEph.OMEGA_DOT;
-    idot = gpsEph.IDOT;
+    C_rs = ephem.Crs;
+    deltan = ephem.Delta_n;
+    M_0 = ephem.M0;
+    C_uc = ephem.Cuc;
+    e = ephem.e;
+    C_us = ephem.Cus;
+    sqrt_a = ephem.Asqrt;
+    t_oe = ephem.Toe;
+    C_ic = ephem.Cic;
+    Omega_0 = ephem.OMEGA;
+    C_is =ephem.Cis;
+    i_0 = ephem.i0;
+    C_rc = ephem.Crc;
+    omega = ephem.omega;
+    Omegadot = ephem.OMEGA_DOT;
+    idot = ephem.IDOT;
 
     t = tx_time;
 

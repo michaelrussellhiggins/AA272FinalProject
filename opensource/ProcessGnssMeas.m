@@ -42,6 +42,7 @@ gnssMeas.ClkDCount  = zeros(N,1);
 gnssMeas.HwDscDelS  = zeros(N,1);
 gnssMeas.Svid       = unique(gnssRaw.Svid)'; %all the sv ids found in gnssRaw
 M = length(gnssMeas.Svid);
+gnssMeas.utc        = zeros(N,M)+NaN;
 gnssMeas.AzDeg      = zeros(1,M)+NaN;
 gnssMeas.ElDeg      = zeros(1,M)+NaN;
 gnssMeas.tRxSeconds = zeros(N,M)+NaN; %time of reception, seconds of gps week
@@ -103,6 +104,7 @@ AdrM        = gnssRaw.AccumulatedDeltaRangeMeters;
 AdrSigmaM   = gnssRaw.AccumulatedDeltaRangeUncertaintyMeters;
 AdrState    = gnssRaw.AccumulatedDeltaRangeState;
 Cn0DbHz     = gnssRaw.Cn0DbHz;
+utc         = gnssRaw.utcTimeMillis;
 
 %Now pack these vectors into the NxM matrices
 for i=1:N %i is index into gnssMeas.FctSeconds and matrix rows
@@ -111,6 +113,7 @@ for i=1:N %i is index into gnssMeas.FctSeconds and matrix rows
     for j=1:length(J) %J(j) is index into gnssRaw.*
         k = find(gnssMeas.Svid==gnssRaw.Svid(J(j)));
         %k is the index into gnssMeas.Svid and matrix columns
+        gnssMeas.utc(i,k)        = utc(J(j));
         gnssMeas.tRxSeconds(i,k) = tRxSeconds(J(j));
         gnssMeas.tTxSeconds(i,k) = tTxSeconds(J(j));
         gnssMeas.PrM(i,k)        = PrM(J(j));
@@ -124,6 +127,7 @@ for i=1:N %i is index into gnssMeas.FctSeconds and matrix rows
     end
     %save the hw clock discontinuity count for this epoch:
     gnssMeas.ClkDCount(i) = gnssRaw.HardwareClockDiscontinuityCount(J(1));
+    
     
     if gnssRaw.HardwareClockDiscontinuityCount(J(1)) ~= ...
             gnssRaw.HardwareClockDiscontinuityCount(J(end))
