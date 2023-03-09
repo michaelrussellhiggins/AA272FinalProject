@@ -32,7 +32,7 @@ close all
 %     GetGPSMeasurements(gnssfilenames{i});
 % end
 
-gpsfiles = dir('Data/GPSOnly/*.csv');
+gpsfiles = dir('Data/GPSMeasurements/*.csv');
 
 gpsfilenames = {gpsfiles.name};
 
@@ -44,15 +44,15 @@ gpsfilenames = {gpsfiles.name};
 
 % Get GPS positions from ephemeris data
 
-for i = 1
-    GetSatellitePosition(gpsfilenames{i});
-end
+% for i = 1:length(gpsfilenames)
+%     GetSatellitePosition(gpsfilenames{i});
+% end
 
 % Get user position from GPS data
 
-for i = 1
-    GetUserPosition(gpsfilenames{i});
-end
+% for i = 1:length(gpsfilenames)
+%     GetUserPosition(gpsfilenames{i});
+% end
 
 % Convert user ECEF data to local coordinates
 
@@ -60,13 +60,17 @@ end
 
 % Extract IMU data from each .xlsx file spreadsheet
 
-% imufiles = dir('Data/Parsed/*.xlsx');
-% 
-% imufilenames = {imufiles.name};
-% 
+imufiles = dir('Data/Parsed/*.xlsx');
+
+imufilenames = {imufiles.name};
+
 % for i = 1:length(imufilenames)
 %     GetCorrectedIMUData(imufilenames{i});
 % end
 
-% 
+% Apply Kalman filter
+
+for i = 1:length(imufilenames)
+    FuseGPSIMU(imufilenames{i}(1:end-5))
+end
 
