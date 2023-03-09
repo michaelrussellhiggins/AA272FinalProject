@@ -1,8 +1,8 @@
 function FuseGPSIMU(fileheader)
 
-gpsdata = readtable(strcat('Data/GPSPositionDirect/', fileheader, '.csv'));
-acceldata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 'accel');
-orientdata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 'orientation');
+gpsdata = readtable(strcat('Data/GPSPositionClip/', fileheader, '.csv'));
+acceldata = readtable(strcat('Data/IMUReadingsClip/', fileheader, '.xlsx'), 'Sheet', 'accel');
+orientdata = readtable(strcat('Data/IMUReadingsClip/', fileheader, '.xlsx'), 'Sheet', 'orientation');
 
 numGPS = size(gpsdata, 1);
 numaccel = size(acceldata, 1);

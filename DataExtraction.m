@@ -32,7 +32,7 @@ close all
 %     GetGPSMeasurements(gnssfilenames{i});
 % end
 
-gpsfiles = dir('Data/GPSMeasurements/*.csv');
+gpsfiles = dir('Data/GPSPositionClip/*.csv');
 
 gpsfilenames = {gpsfiles.name};
 
@@ -60,7 +60,7 @@ gpsfilenames = {gpsfiles.name};
 
 % Extract IMU data from each .xlsx file spreadsheet
 
-imufiles = dir('Data/Parsed/*.xlsx');
+imufiles = dir('Data/IMUReadingsClip/*.xlsx');
 
 imufilenames = {imufiles.name};
 

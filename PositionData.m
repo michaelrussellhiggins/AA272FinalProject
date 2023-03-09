@@ -5,14 +5,35 @@ clear
 clc
 
 %%
-gpsposfiles = dir('Data/GPSPosition2/*.csv');
+gpsposfiles = dir('Data/GPSPositionDirect/*.csv');
 
 gpsfilenames = {gpsposfiles.name};
-fileidx = 40;
+fileidx = 72;
 gpsfile = gpsfilenames{fileidx};
 
-gpsdata = readtable(['Data/GPSPosition2/' gpsfile]);
+gpsdata = readtable(['Data/GPSPositionDirect/' gpsfile]);
 
+%%
+
+imuposfiles = dir('Data/IMUReadings/*.xlsx');
+
+imufilenames = {imuposfiles.name};
+imufile = imufilenames{fileidx};
+
+acceldata = readtable(['Data/IMUReadings/' imufile],'Sheet','accel');
+gyrodata = readtable(['Data/IMUReadings/' imufile],'Sheet','gyro');
+magdata = readtable(['Data/IMUReadings/' imufile],'Sheet','mag');
+orientdata = readtable(['Data/IMUReadings/' imufile],'Sheet','orientation');
+
+timeA = (acceldata.utcTimeMillis-acceldata.utcTimeMillis(1))/1000;
+accX = acceldata.CalAccelXMps2;
+accY = acceldata.CalAccelYMps2;
+accZ = acceldata.CalAccelZMps2;
+
+timeO = (orientdata.utcTimeMillis-orientdata.utcTimeMillis(1))/1000;
+yaw = orientdata.yawDeg;
+roll = orientdata.rollDeg;
+pitch = orientdata.pitchDeg;
 %%
 
 r_ENU = [gpsdata.E gpsdata.N gpsdata.U];
@@ -34,3 +55,128 @@ axis equal
 grid on
 xlabel('E-axis(m)')
 ylabel('N-axis(m)')
+
+%%
+%M = movmean(accX,100);
+
+figure;
+plot(accX)
+hold on
+%plot(M)
+plot(accY)
+plot(accZ)
+grid on
+ylabel('Acceleration (m/s^2)')
+xlabel('index')
+%%
+
+
+figure;
+plot(yaw)
+hold on
+plot(roll)
+plot(pitch)
+grid on
+ylabel('Orientation (deg)')
+xlabel('index')
+
+%%
+
+figure;
+yyaxis right
+plot(timeO,yaw)
+hold on
+plot(timeO,roll)
+plot(timeO,pitch)
+ylabel('Orientation (deg)')
+yyaxis left
+plot(timeA,accX)
+plot(timeA,accY)
+plot(timeA,accZ)
+grid on
+ylabel('Acceleration (m/s^2)')
+xlabel('time from log start (s)')
+legend('X acc','Y acc','Z acc','yaw','roll','pitch')
+
+%%
+load accelstartstop.mat
+accelcliptimes = zeros(72,2);
+for i = 1:length(gpsposfiles)
+    imufile = imufilenames{i};
+    acceldata = readtable(['Data/IMUReadings/' imufile],'Sheet','accel');
+    accelcliptimes(i,1) = acceldata.utcTimeMillis(accelstartstop(i,1));
+    accelcliptimes(i,2) = acceldata.utcTimeMillis(accelstartstop(i,2));
+end
+%%
+
+orientstartstop = zeros(72,2);
+orientcliptimes = zeros(72,2);
+
+for i = 1:72
+    imufile = imufilenames{i};
+    orientdata = readtable(['Data/IMUReadings/' imufile],'Sheet','orientation');
+    orientutc = orientdata.utcTimeMillis;
+
+    minOstop = 1e10;
+    minOstart = 1e10;
+
+    for j = 1:length(orientutc)
+        odiffstart = abs(orientutc(j) - accelcliptimes(i,1));
+        odiffstop = abs(orientutc(j) - accelcliptimes(i,2));
+        if odiffstart < minOstart
+            orientcliptimes(i,1) = orientutc(j);
+            orientstartstop(i,1) = j;
+            minOstart = odiffstart;
+        end
+        if odiffstop < minOstop
+            orientcliptimes(i,2) = orientutc(j);
+            orientstartstop(i,2) = j;
+            minOstop = odiffstop;
+        end
+    end
+end
+
+%%
+gpsstartstop = zeros(72,2);
+gpscliptimes = zeros(72,2);
+
+for i = 1:72
+    gpsfile = gpsfilenames{i};
+    gpsdata = readtable(['Data/GPSPositionDirect/' gpsfile]);  
+    gpsutc = gpsdata.utc;
+
+    minGstop = 1e10;
+    minGstart = 1e10;
+    
+    for j = 1:length(gpsutc)
+        gdiffstart = abs(gpsutc(j) - accelcliptimes(i,1));
+        gdiffstop = abs(gpsutc(j) - accelcliptimes(i,2));
+        if gdiffstart < minGstart
+            gpscliptimes(i,1) = gpsutc(j);
+            gpsstartstop(i,1) = j;
+            minGstart = gdiffstart;
+        end
+        if gdiffstop < minGstop
+            gpscliptimes(i,2) = gpsutc(j);
+            gpsstartstop(i,2) = j;
+            minGstop = gdiffstop;
+        end
+    end
+end
+
+%%
+% figure;
+% plot(orientdata.utcTimeMillis)
+% hold on
+% plot(accelcliptimes(idx,1)*ones(size(orientdata,1),1),'g')
+% plot(accelcliptimes(idx,2)*ones(size(orientdata,1),1),'r')
+% 
+% figure;
+% plot(gpsdata.utc)
+% hold on
+% plot(accelcliptimes(idx,1)*ones(size(gpsdata,1),1),'g')
+% plot(accelcliptimes(idx,2)*ones(size(gpsdata,1),1),'r')
+
+
+
+
