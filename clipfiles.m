@@ -7,7 +7,7 @@ clc
 clips = readtable('routeclipping.xlsx');
 %%
 
-gpsposfiles = dir('Data/GPSPositionDirect/*.csv');
+gpsposfiles = dir('Data/GPSPositionDirect2/*.csv');
 gpsfilenames = {gpsposfiles.name};
 
 imuposfiles = dir('Data/IMUReadings/*.xlsx');
@@ -24,7 +24,7 @@ for i = 1:72
     orientdata = readtable(['Data/IMUReadings/' imufile],'Sheet','orientation');
     orientdataclip = orientdata(clips.OrientStartIDX(i):clips.OrientStopIDX(i),:);
 
-    writeGfile = ['Data/GPSPositionClip/',gpsfile];
+    writeGfile = ['Data/GPSPositionClip2/',gpsfile];
     writetable(gpsdataclip,writeGfile);
 
     writeIfile = ['Data/IMUReadingsClip/',imufile];
