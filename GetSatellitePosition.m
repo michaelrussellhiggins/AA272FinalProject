@@ -2,7 +2,7 @@ function GetSatellitePosition(gpsfile)
 
 % Loads data
 
-data = readtable(strcat('Data/GPSOnly/', gpsfile));
+data = readtable(strcat('Data/GPSMeasurements/', gpsfile));
 dirName = 'Ephem';
 
 numData = size(data, 1);

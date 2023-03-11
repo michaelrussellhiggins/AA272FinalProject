@@ -23,7 +23,7 @@ Orientidx = 1;
 UTCsec = [];
 
 [mintime, idx] = min([GPSUTC, AccelUTC, OrientUTC]);
-UTCsec(1) = mintime
+UTCsec(1) = mintime;
 
 if idx == 1
     GPSidx = GPSidx + 1;
@@ -39,7 +39,7 @@ end
 i = 1;
 
 Q_ekf = diag([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]);
-R_ekf = diag([5, 5, 5, 1, 1, 1]);
+R_ekf = diag([10, 10, 10, 0.5, 0.5, 0.5]);
 
 mu_t_t(:,1) = zeros(9,1);
 
@@ -50,8 +50,8 @@ while (GPSidx < numGPS) && (Accelidx < numaccel) && (Orientidx < numorient)
     i = i+1;
 
     GPSUTC = latestGPS(1)/(10^3);
-    AccelUTC = latestaccel(1)/(10^3); %%%%%%%%%%%%%%%
-    OrientUTC = latestorient(1)/(10^3); %%%%%%%%%%%%%%%%%%%
+    AccelUTC = latestaccel(1)/(10^3);
+    OrientUTC = latestorient(1)/(10^3);
        
     [mintime, idx] = min([GPSUTC, AccelUTC, OrientUTC]);
     UTCsec(i) = mintime;
@@ -81,17 +81,17 @@ while (GPSidx < numGPS) && (Accelidx < numaccel) && (Orientidx < numorient)
 
     z = [latestGPS(8:10), a_ENU']';
 
-    deltat = (UTCsec(i) - UTCsec(i-1))/(10^3);
+    deltat = (UTCsec(i) - UTCsec(i-1));
 
     % Predict
-    mu_t_t_minus = mu_t_t(:,i-1);
+    mu_t_t_minus = get_F(mu_t_t(:,i-1), deltat)*mu_t_t(:,i-1);
     P_t_t_minus = get_F(mu_t_t(:,i-1), deltat)*P_t_t*get_F(mu_t_t(:,i-1), deltat)' + Q_ekf;
 
     % Update
-    y_tilde_t = (z - meas_mdl(mu_t_t(:,i-1))');
-    K_t = P_t_t_minus*get_H(mu_t_t(:,i-1))'*inv(R_ekf + get_H(mu_t_t(:,i-1))*P_t_t_minus*get_H(mu_t_t(:,i-1))');
+    y_tilde_t = z - meas_mdl(mu_cur);
+    K_t = P_t_t_minus*get_H(mu_t_t_minus)'*inv(R_ekf + get_H(mu_t_t_minus)*P_t_t_minus*get_H(mu_t_t_minus)');
     mu_t_t(:,i) = mu_t_t_minus + K_t*y_tilde_t;
-    P_t_t = (eye(9) - K_t*get_H(mu_t_t(:,i-1)))*P_t_t_minus;
+    P_t_t = (eye(9) - K_t*get_H(mu_t_t_minus))*P_t_t_minus;
 
 end
 
@@ -137,7 +137,7 @@ function F = get_F(mu_cur, deltat)
     F(3,6) = deltat;
     F(4,7) = deltat;
     F(5,8) = deltat;
-    F(5,9) = deltat;
+    F(6,9) = deltat;
 
 end
 

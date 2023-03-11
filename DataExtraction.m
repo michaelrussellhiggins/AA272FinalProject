@@ -71,6 +71,6 @@ imufilenames = {imufiles.name};
 % Apply Kalman filter
 
 for i = 1:length(imufilenames)
-    FuseGPSIMU(imufilenames{i}(1:end-5))
+    FuseGPSIMU4(imufilenames{i}(1:end-5))
 end
 
