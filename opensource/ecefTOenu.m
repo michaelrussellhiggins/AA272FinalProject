@@ -7,14 +7,15 @@ function [r_enu] = ecefTOenu(r_ecef,loc)
     
     switch loc
         case 1
-            lat_station = 37.430780;
-            lon_station = -122.155026;
+            lat_station = 37.430780;%37.430779
+            lon_station = -122.155026;%-122.155025
         case 2
-            lat_station = 37.431294;
-            lon_station = -122.155059;
+            lat_station = 37.431294;%37.431276, -122.155041
+            lon_station = -122.155059;%37.431279, -122.155042
+
         case 3
             lat_station = 37.431108;
-            lon_station = -122.155158;
+            lon_station = -122.155158;%37.431101, -122.155151
     end
 
     r_E = 6.3781e6; % m
