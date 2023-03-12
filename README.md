@@ -1,3 +1,5 @@
+# AA272 Final Project - Applying GPS/IMU Sensor Fusion to Athlete Tracking
+
 The primary objective of this project was to use GPS/IMU sensor fusion to track American football receivers and cornerbacks through a number of differnt routes. Sensor data was collected using the GNSSLogger app, found on the Google Play Store.
 
 The Data folder contains much of the raw (.txt) and processed GPS (.csv) and IMU (.xlsx) data.
