@@ -1,4 +1,4 @@
-function FuseGPSIMU2(fileheader)
+function [UTCsec, mu_pos, ub, lb] = KFGPSTimes(fileheader)
 
 gpsdata = readtable(strcat('Data/GPSPositionDirect/', fileheader, '.csv'));
 acceldata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 'accel');
@@ -10,12 +10,19 @@ UTCsec = [];
 
 UTCsec(1) = gpsdata{1,1}/(10^3);
 
-Q_ekf = diag([1, 1, 1, 1, 1, 1, 1, 1, 1]);
-R_ekf = diag([5, 5, 5, 0.1, 0.1, 0.1]);
+Q_ekf = diag([0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]);
+R_ekf = diag([1000, 1000, 1000, 1, 1, 1]);
 
 mu_t_t(:,1) = zeros(9,1);
 
 P_t_t = diag([5, 5, 5, 1, 1, 1, 1, 1, 1]);
+
+ub(1,1) = mu_t_t(1,1) + 1.96*P_t_t(1,1);
+ub(2,1) = mu_t_t(2,1) + 1.96*P_t_t(2,2);
+ub(3,1) = mu_t_t(3,1) + 1.96*P_t_t(3,3);
+lb(1,1) = mu_t_t(1,1) - 1.96*P_t_t(1,1);
+lb(2,1) = mu_t_t(2,1) - 1.96*P_t_t(2,2);
+lb(3,1) = mu_t_t(3,1) - 1.96*P_t_t(3,3);
 
 for i = 2:numGPS
 
@@ -50,17 +57,16 @@ for i = 2:numGPS
     mu_t_t(:,i) = mu_t_t_minus + K_t*y_tilde_t;
     P_t_t = (eye(9) - K_t*get_H(mu_t_t(:,i-1)))*P_t_t_minus;
 
+    ub(1,i) = mu_t_t(1,i) + 1.96*P_t_t(1,1);
+    ub(2,i) = mu_t_t(2,i) + 1.96*P_t_t(2,2);
+    ub(3,i) = mu_t_t(3,i) + 1.96*P_t_t(3,3);
+    lb(1,i) = mu_t_t(1,i) - 1.96*P_t_t(1,1);
+    lb(2,i) = mu_t_t(2,i) - 1.96*P_t_t(2,2);
+    lb(3,i) = mu_t_t(3,i) - 1.96*P_t_t(3,3);
+
 end
 
-figure(1)
-
-plot(UTCsec, mu_t_t(1,:))
-hold on
-plot(UTCsec, mu_t_t(2,:))
-
-figure(2)
-
-plot(mu_t_t(1,:), mu_t_t(2,:))
+mu_pos = mu_t_t(1:3,:);
 
 end
 

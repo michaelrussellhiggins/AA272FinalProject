@@ -1,4 +1,4 @@
-function [UTCsec, mu_pos, ub, lb] = EKFAllMeas(fileheader)
+function [UTCsec, mu_pos, ub, lb] = EKFGPSTimes(fileheader)
 
 gpsdata = readtable(strcat('Data/GPSPositionDirect/', fileheader, '.csv'));
 acceldata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 'accel');
@@ -6,45 +6,10 @@ gyrodata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 
 orientdata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 'orientation');
 
 numGPS = size(gpsdata, 1);
-numaccel = size(acceldata, 1);
-numgyro = size(gyrodata, 1);
-numorient = size(orientdata, 1);
-
-latestGPS = gpsdata{1, :};
-latestaccel = acceldata{1, :};
-latestgyro = gyrodata{1, :};
-latestorient = orientdata{1, :};
-
-GPSUTC = latestGPS(1)/(10^3);
-AccelUTC = latestaccel(1)/(10^3);
-GyroUTC = latestaccel(1)/(10^3);
-OrientUTC = latestorient(1)/(10^3);
-
-GPSidx = 1;
-Accelidx = 1;
-Gyroidx = 1;
-Orientidx = 1;
 
 UTCsec = [];
 
-[mintime, idx] = min([GPSUTC, AccelUTC, OrientUTC, GyroUTC]);
-UTCsec(1) = mintime;
-
-if idx == 1
-    GPSidx = GPSidx + 1;
-    latestGPS = gpsdata{GPSidx, :};
-elseif idx == 2
-    Accelidx = Accelidx + 1;
-    latestaccel = acceldata{Accelidx, :};
-elseif idx == 3
-    Orientidx = Orientidx + 1;
-    latestorient = orientdata{Orientidx, :};
-elseif idx == 4
-    Gyroidx = Gyroidx + 1;
-    latestgyro = orientdata{Gyroidx, :};
-end
-
-i = 1;
+UTCsec(1) = gpsdata{1,1}/(10^3);
 
 Q_ekf = diag([0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]);
 R_ekf = diag([1000, 1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
@@ -60,33 +25,15 @@ lb(1,1) = mu_t_t(1,1) - 1.96*P_t_t(1,1);
 lb(2,1) = mu_t_t(2,1) - 1.96*P_t_t(2,2);
 lb(3,1) = mu_t_t(3,1) - 1.96*P_t_t(3,3);
 
-while (GPSidx < numGPS) && (Accelidx < numaccel) && (Orientidx < numorient) && (Gyroidx < numgyro)
+for i = 2:numGPS
 
-    i = i+1;
+    UTCsec(i) = gpsdata{i,1}/(10^3);
 
-    GPSUTC = latestGPS(1)/(10^3);
-    AccelUTC = latestaccel(1)/(10^3);
-    OrientUTC = latestorient(1)/(10^3);
-    GyroUTC = latestorient(1)/(10^3);
-       
-    [mintime, idx] = min([GPSUTC, AccelUTC, OrientUTC, GyroUTC]);
-    UTCsec(i) = mintime;
+    [accelUTC accelidx] = min(abs(acceldata{:,1} - gpsdata{i,1}));
+    [orientUTC orientidx] = min(abs(orientdata{:,1} - gpsdata{i,1}));
+    [gyroUTC gyroidx] = min(abs(gyrodata{:,1} - gyrodata{i,1}));
 
-    if idx == 1
-        GPSidx = GPSidx + 1;
-        latestGPS = gpsdata{GPSidx, :};
-    elseif idx == 2
-        Accelidx = Accelidx + 1;
-        latestaccel = acceldata{Accelidx, :};
-    elseif idx == 3
-        Orientidx = Orientidx + 1;
-        latestorient = orientdata{Orientidx, :};
-    elseif idx == 4
-        Gyroidx = Gyroidx + 1;
-        latestorient = gyrodata{Gyroidx, :};
-    end
-
-    z = [latestGPS(8:10), latestaccel(9:11), latestorient(3:5), latestgyro(9:11)]';
+    z = [gpsdata{i, 8:10}, acceldata{accelidx, 9:11}, orientdata{orientidx, 3:5}, gyrodata{gyroidx, 9:11}]';
 
     deltat = (UTCsec(i) - UTCsec(i-1));
 

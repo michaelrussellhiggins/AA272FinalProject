@@ -49,7 +49,7 @@ end
 
 gtENU = table2array(groundtruth(:,rte));
 
-FuseGPSIMU(imufilenames{idx}(1:end-5));
+[UTCsec, mu_pos, ub, lb] = EKFGPSTimes(imufilenames{idx}(1:end-5));
 
 figure(2);
 hold on
