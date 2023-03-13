@@ -18,18 +18,34 @@ GPSUTC = latestGPS(1)/(10^3);
 AccelUTC = latestaccel(1)/(10^3);
 OrientUTC = latestorient(1)/(10^3);
 
-GPSidx = 2;
-Accelidx = 2;
-Orientidx = 2;
-
 UTCsec = [];
 
-[maxtime, idx] = min([GPSUTC, AccelUTC, OrientUTC]);
+[maxtime, idx] = max([GPSUTC, AccelUTC, OrientUTC]);
 UTCsec(1) = maxtime;
 
-latestGPS = gpsdata{1, :};
-latestaccel = acceldata{1, :};
-latestorient = orientdata{1, :};
+[GPSUTC firstgps] = min(abs(gpsdata{:,1} - UTCsec(1)*(10^3)));
+[accelUTC firstaccel] = min(abs(acceldata{:,1} - UTCsec(1)*(10^3)));
+[orientUTC firstorient] = min(abs(orientdata{:,1} - UTCsec(1)*(10^3)));
+
+if (gpsdata{firstgps,1} - UTCsec(1)*(10^3)) < 0
+    GPSidx = firstgps + 2;
+else
+    GPSidx = firstgps + 1;
+end
+if (acceldata{firstaccel,1} - UTCsec(1)*(10^3)) < 0
+    Accelidx = firstaccel + 2;
+else
+    Accelidx = firstaccel + 1;
+end
+if (orientdata{firstorient,1} - UTCsec(1)*(10^3)) < 0
+    Orientidx = firstorient + 2;
+else
+    Orientidx = firstorient + 1;
+end
+
+latestGPS = gpsdata{GPSidx - 1, :};
+latestaccel = acceldata{Accelidx - 1, :};
+latestorient = orientdata{Orientidx - 1, :};
 
 i = 1;
 
