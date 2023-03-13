@@ -170,8 +170,57 @@ title('Extended Kalman Filter, All Measurements')
 
 %% calc error
 
+pos_error = [];
+for i = 1:72
+    imufile = imufilenames{i};
+    [UTCsec, mu_pos, ub, lb] = EKFAllMeas(imufilenames{i}(1:end-5));
+
+    rte = 0;
+    loc_char = imufile(9:11);
+    if (strcmp(loc_char,'Dra') == 1)
+        rte = 1;
+    elseif (strcmp(loc_char,'Out') == 1)
+        rte = 2;
+    elseif (strcmp(loc_char,'Cur') == 1)
+        rte = 3;
+    elseif (strcmp(loc_char,'Fly') == 1)
+        rte = 4;
+    elseif (strcmp(loc_char,'Pos') == 1)
+        rte = 5;
+    elseif (strcmp(loc_char,'Cor') == 1)
+        rte = 6;
+    end
+    gtENU = table2array(groundtruth(:,rte));
+
+
+        t_GT = [UTCsec(1) UTCsec(floor(end/2)) UTCsec(end)];
+        gtE = interp1(t_GT,gtENU(:,1),UTCsec);
+        gtN = interp1(t_GT,gtENU(:,2),UTCsec);
+
+        pos_error{i,1} = {sqrt((gtE - mu_pos(1,:)).^2 +(gtN - mu_pos(2,:)).^2)};
+
+
+
+end
+
+%%
+% save pos_errorEKFall.mat pos_errorEKFall
+
+
 %% error plots
 
+load pos_errorEKFall.mat
 
+mean_error = zeros(72,1);
+
+for i=1:72
+    mean_error(i) = mean(cell2mat(pos_errorEKFall{i}));
+end
+
+figure;
+plot(mean_error)
+xlabel('Trial #')
+ylabel('Mean Position Error (m)')
+title('Position Error for each Trial, EKF All Measurements')
 
 
