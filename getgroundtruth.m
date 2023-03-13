@@ -101,8 +101,8 @@ for i=1:6
         imufile = imufilenames{fileidx};
 
         gtENU = table2array(groundtruth(:,rte));
-        [UTCsecO, mu_posO, ~, ~] = EKFGPSTimes(imufilenames{fileidx}(1:end-5));
-        [UTCsecD, mu_posD, ~, ~] = EKFGPSTimes(imufilenames{fileidx+36}(1:end-5));
+        [UTCsecO, mu_posO, ~, ~] = KFGPSTimes(imufilenames{fileidx}(1:end-5));
+        [UTCsecD, mu_posD, ~, ~] = KFGPSTimes(imufilenames{fileidx+36}(1:end-5));
 
         subplot(6,6,subidx)
         hold on
@@ -173,7 +173,7 @@ title('Extended Kalman Filter, All Measurements')
 pos_error = [];
 for i = 1:72
     imufile = imufilenames{i};
-    [UTCsec, mu_pos, ub, lb] = EKFAllMeas(imufilenames{i}(1:end-5));
+    [UTCsec, mu_pos, ub, lb] = EKFGPSTimes(imufilenames{i}(1:end-5));
 
     rte = 0;
     loc_char = imufile(9:11);

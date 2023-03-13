@@ -99,7 +99,7 @@ xlabel('time from log start (s)')
 legend('X acc','Y acc','Z acc','yaw','roll','pitch')
 
 %%
-load accelstartstop.mat
+load 'ClipData/accelstartstop.mat'
 accelcliptimes = zeros(72,2);
 for i = 1:length(gpsposfiles)
     imufile = imufilenames{i};
@@ -107,7 +107,7 @@ for i = 1:length(gpsposfiles)
     accelcliptimes(i,1) = acceldata.utcTimeMillis(accelstartstop(i,1));
     accelcliptimes(i,2) = acceldata.utcTimeMillis(accelstartstop(i,2));
 end
-%%
+%% orient clip
 
 orientstartstop = zeros(72,2);
 orientcliptimes = zeros(72,2);
@@ -135,8 +135,36 @@ for i = 1:72
         end
     end
 end
+%% gyro clip
 
-%%
+gyrostartstop = zeros(72,2);
+gyrocliptimes = zeros(72,2);
+
+for i = 1:72
+    imufile = imufilenames{i};
+    gyrodata = readtable(['Data/IMUReadings/' imufile],'Sheet','gyro');
+    gyroutc = gyrodata.utcTimeMillis;
+
+    minYstop = 1e10;
+    minYstart = 1e10;
+
+    for j = 1:length(gyroutc)
+        ydiffstart = abs(gyroutc(j) - accelcliptimes(i,1));
+        ydiffstop = abs(gyroutc(j) - accelcliptimes(i,2));
+        if ydiffstart < minYstart
+            gyrocliptimes(i,1) = gyroutc(j);
+            gyrostartstop(i,1) = j;
+            minYstart = ydiffstart;
+        end
+        if ydiffstop < minYstop
+            gyrocliptimes(i,2) = gyroutc(j);
+            gyrostartstop(i,2) = j;
+            minYstop = ydiffstop;
+        end
+    end
+end
+%% gps clip
+
 gpsstartstop = zeros(72,2);
 gpscliptimes = zeros(72,2);
 

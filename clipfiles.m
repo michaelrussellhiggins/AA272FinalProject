@@ -15,7 +15,7 @@ imufilenames = {imuposfiles.name};
 
 for i = 1:72
     gpsfile = gpsfilenames{i};
-    gpsdata = readtable(['Data/GPSPositionDirect/' gpsfile]);
+    gpsdata = readtable(['Data/GPSPositionDirect2/' gpsfile]);
     gpsdataclip = gpsdata(clips.GPSStartIDX(i):clips.GPSStopIDX(i),:);
 
     imufile = imufilenames{i};
@@ -23,6 +23,8 @@ for i = 1:72
     acceldataclip = acceldata(clips.AccStartIDX(i):clips.AccStopIDX(i),:);
     orientdata = readtable(['Data/IMUReadings/' imufile],'Sheet','orientation');
     orientdataclip = orientdata(clips.OrientStartIDX(i):clips.OrientStopIDX(i),:);
+    gyrodata = readtable(['Data/IMUReadings/' imufile],'Sheet','gyro');
+    gyrodataclip = orientdata(clips.GyroStartIDX(i):clips.GyroStopIDX(i),:);
 
     writeGfile = ['Data/GPSPositionClip2/',gpsfile];
     writetable(gpsdataclip,writeGfile);
@@ -30,5 +32,6 @@ for i = 1:72
     writeIfile = ['Data/IMUReadingsClip/',imufile];
     writetable(acceldataclip,writeIfile,'Sheet','accel');
     writetable(orientdataclip,writeIfile,'Sheet','orientation');
+    writetable(gyrodataclip,writeIfile,'Sheet','gyro');
 
 end
