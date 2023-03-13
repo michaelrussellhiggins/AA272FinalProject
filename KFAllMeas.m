@@ -4,6 +4,8 @@ gpsdata = readtable(strcat('Data/GPSPositionClip2/', fileheader, '.csv'));
 acceldata = readtable(strcat('Data/IMUReadingsClip/', fileheader, '.xlsx'), 'Sheet', 'accel');
 orientdata = readtable(strcat('Data/IMUReadingsClip/', fileheader, '.xlsx'), 'Sheet', 'orientation');
 
+gpsdata = gpsdata(~(isnan(gpsdata.utc)),:);
+
 numGPS = size(gpsdata, 1);
 numaccel = size(acceldata, 1);
 numorient = size(orientdata, 1);
@@ -16,25 +18,18 @@ GPSUTC = latestGPS(1)/(10^3);
 AccelUTC = latestaccel(1)/(10^3);
 OrientUTC = latestorient(1)/(10^3);
 
-GPSidx = 1;
-Accelidx = 1;
-Orientidx = 1;
+GPSidx = 2;
+Accelidx = 2;
+Orientidx = 2;
 
 UTCsec = [];
 
-[mintime, idx] = min([GPSUTC, AccelUTC, OrientUTC]);
-UTCsec(1) = mintime;
+[maxtime, idx] = min([GPSUTC, AccelUTC, OrientUTC]);
+UTCsec(1) = maxtime;
 
-if idx == 1
-    GPSidx = GPSidx + 1;
-    latestGPS = gpsdata{GPSidx, :};
-elseif idx == 2
-    Accelidx = Accelidx + 1;
-    latestaccel = acceldata{Accelidx, :};
-elseif idx == 3
-    Orientidx = Orientidx + 1;
-    latestorient = orientdata{Orientidx, :};
-end
+latestGPS = gpsdata{1, :};
+latestaccel = acceldata{1, :};
+latestorient = orientdata{1, :};
 
 i = 1;
 
@@ -52,27 +47,40 @@ lb(1,1) = mu_t_t(1,1) - 1.96*P_t_t(1,1);
 lb(2,1) = mu_t_t(2,1) - 1.96*P_t_t(2,2);
 lb(3,1) = mu_t_t(3,1) - 1.96*P_t_t(3,3);
 
-while (GPSidx < numGPS) && (Accelidx < numaccel) && (Orientidx < numorient)
+while (GPSidx <= numGPS) || (Accelidx <= numaccel) || (Orientidx <= numorient)
 
     i = i+1;
 
-    GPSUTC = latestGPS(1)/(10^3);
-    AccelUTC = latestaccel(1)/(10^3);
-    OrientUTC = latestorient(1)/(10^3);
+    if GPSidx > numGPS
+        GPSUTC = NaN;
+    else
+        GPSUTC = latestGPS(1)/(10^3);
+    end
+    if Accelidx > numaccel
+        AccelUTC = NaN;
+    else
+        AccelUTC = latestaccel(1)/(10^3);
+    end
+    if Orientidx > numorient
+        OrientUTC = NaN;
+    else
+        OrientUTC = latestorient(1)/(10^3);
+    end
        
     [mintime, idx] = min([GPSUTC, AccelUTC, OrientUTC]);
-    UTCsec(i) = mintime;
 
     if idx == 1
-        GPSidx = GPSidx + 1;
         latestGPS = gpsdata{GPSidx, :};
+        GPSidx = GPSidx + 1;
     elseif idx == 2
-        Accelidx = Accelidx + 1;
         latestaccel = acceldata{Accelidx, :};
+        Accelidx = Accelidx + 1;
     elseif idx == 3
-        Orientidx = Orientidx + 1;
         latestorient = orientdata{Orientidx, :};
+        Orientidx = Orientidx + 1;
     end
+
+    UTCsec(i) = mintime;
 
     a_XYZ = latestaccel(9:11)';
 

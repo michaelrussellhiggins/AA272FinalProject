@@ -4,6 +4,8 @@ gpsdata = readtable(strcat('Data/GPSPositionClip2/', fileheader, '.csv'));
 acceldata = readtable(strcat('Data/IMUReadingsClip/', fileheader, '.xlsx'), 'Sheet', 'accel');
 orientdata = readtable(strcat('Data/IMUReadingsClip/', fileheader, '.xlsx'), 'Sheet', 'orientation');
 
+gpsdata = gpsdata(~(isnan(gpsdata.utc)),:);
+
 numGPS = size(gpsdata, 1);
 
 UTCsec = [];

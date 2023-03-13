@@ -63,117 +63,117 @@ load 'ClipData/groundtruth.mat'
 
 %% 6x6 plot
 
-figure;
-imufiles = dir('Data/IMUReadingsClip/*.xlsx');
-imufilenames = {imufiles.name};
-
-for i=1:6
-    for j = 1:6
-        subidx = j + (i-1)*6;
-
-        rte = 0;
-        if i == 1
-            rte = 1;
-            fileidx = 12 + j; % compensates for alphabetical ordering of files
-            plotname = "Drag Trial " + string(j)
-        elseif (i == 2)
-            rte = 2;
-            fileidx = 24 + j;
-            plotname = "Out Trial " + string(j)
-        elseif (i == 3)
-            rte = 3;
-            fileidx = 6 + j;
-            plotname = "Curl Trial " + string(j)
-        elseif (i == 4)
-            rte = 4;
-            fileidx = 18 + j;
-            plotname = "Fly Trial " + string(j)
-        elseif (i == 5)
-            rte = 5;
-            fileidx = 30 + j;
-            plotname = "Post Trial " + string(j)
-        elseif (i == 6)
-            rte = 6;
-            fileidx = 0 + j;
-            plotname = "Corner Trial " + string(j)
-        end
-
-        imufile = imufilenames{fileidx};
-
-        gtENU = table2array(groundtruth(:,rte));
-        [UTCsecO, mu_posO, ~, ~] = KFGPSTimes(imufilenames{fileidx}(1:end-5));
-        [UTCsecD, mu_posD, ~, ~] = KFGPSTimes(imufilenames{fileidx+36}(1:end-5));
-
-        subplot(6,6,subidx)
-        hold on
-        plot(gtENU(:,1),gtENU(:,2),'-ko')
-        plot(mu_posO(1,:),mu_posO(2,:),'-b')
-        plot(mu_posD(1,:),mu_posD(2,:),'-r')
-        axis equal
-        grid on
-        xlabel('E-axis (m)')
-        ylabel('N-axis (m)')
-        title(plotname)
-
-    end
-end
+% figure;
+% imufiles = dir('Data/IMUReadingsClip/*.xlsx');
+% imufilenames = {imufiles.name};
+% 
+% for i=1:6
+%     for j = 1:6
+%         subidx = j + (i-1)*6;
+% 
+%         rte = 0;
+%         if i == 1
+%             rte = 1;
+%             fileidx = 12 + j; % compensates for alphabetical ordering of files
+%             plotname = "Drag Trial " + string(j)
+%         elseif (i == 2)
+%             rte = 2;
+%             fileidx = 24 + j;
+%             plotname = "Out Trial " + string(j)
+%         elseif (i == 3)
+%             rte = 3;
+%             fileidx = 6 + j;
+%             plotname = "Curl Trial " + string(j)
+%         elseif (i == 4)
+%             rte = 4;
+%             fileidx = 18 + j;
+%             plotname = "Fly Trial " + string(j)
+%         elseif (i == 5)
+%             rte = 5;
+%             fileidx = 30 + j;
+%             plotname = "Post Trial " + string(j)
+%         elseif (i == 6)
+%             rte = 6;
+%             fileidx = 0 + j;
+%             plotname = "Corner Trial " + string(j)
+%         end
+% 
+%         imufile = imufilenames{fileidx};
+% 
+%         gtENU = table2array(groundtruth(:,rte));
+%         [UTCsecO, mu_posO, ~, ~] = KFGPSTimes(imufilenames{fileidx}(1:end-5));
+%         [UTCsecD, mu_posD, ~, ~] = KFGPSTimes(imufilenames{fileidx+36}(1:end-5));
+% 
+%         subplot(6,6,subidx)
+%         hold on
+%         plot(gtENU(:,1),gtENU(:,2),'-ko')
+%         plot(mu_posO(1,:),mu_posO(2,:),'-b')
+%         plot(mu_posD(1,:),mu_posD(2,:),'-r')
+%         axis equal
+%         grid on
+%         xlabel('E-axis (m)')
+%         ylabel('N-axis (m)')
+%         title(plotname)
+% 
+%     end
+% end
 
 %% diff kf implementations
 
-compidx = 20;
-[UTCsec1, mu_pos1, ub1, lb1] = KFGPSTimes(imufilenames{compidx}(1:end-5));
-[UTCsec2, mu_pos2, ub2, lb2] = KFAllTimes(imufilenames{compidx}(1:end-5));
-[UTCsec3, mu_pos3, ub3, lb3] = EKFGPSTimes(imufilenames{compidx}(1:end-5));
-[UTCsec4, mu_pos4, ub4, lb4] = EKFAllMeas(imufilenames{compidx}(1:end-5));
-gtENUcomp = table2array(groundtruth(:,4));
-
-figure;
-subplot(2,2,1)
-plot(gtENUcomp(:,1),gtENUcomp(:,2),'-ko')
-hold on
-plot(mu_pos1(1,:),mu_pos1(2,:),'-b')
-axis equal
-grid on
-xlabel('E-axis (m)')
-ylabel('N-axis (m)')
-title('Kalman Filter, GPS Times Only')
-
-subplot(2,2,2)
-plot(gtENUcomp(:,1),gtENUcomp(:,2),'-ko')
-hold on
-plot(mu_pos2(1,:),mu_pos2(2,:),'-b')
-axis equal
-grid on
-xlabel('E-axis (m)')
-ylabel('N-axis (m)')
-title('Kalman Filter, All Times')
-
-subplot(2,2,3)
-plot(gtENUcomp(:,1),gtENUcomp(:,2),'-ko')
-hold on
-plot(mu_pos3(1,:),mu_pos3(2,:),'-b')
-axis equal
-grid on
-xlabel('E-axis (m)')
-ylabel('N-axis (m)')
-title('Extended Kalman Filter, GPS Times Only')
-
-subplot(2,2,4)
-plot(gtENUcomp(:,1),gtENUcomp(:,2),'-ko')
-hold on
-plot(mu_pos4(1,:),mu_pos4(2,:),'-b')
-axis equal
-grid on
-xlabel('E-axis (m)')
-ylabel('N-axis (m)')
-title('Extended Kalman Filter, All Measurements')
+% compidx = 20;
+% [UTCsec1, mu_pos1, ub1, lb1] = KFGPSTimes(imufilenames{compidx}(1:end-5));
+% [UTCsec2, mu_pos2, ub2, lb2] = KFAllTimes(imufilenames{compidx}(1:end-5));
+% [UTCsec3, mu_pos3, ub3, lb3] = EKFGPSTimes(imufilenames{compidx}(1:end-5));
+% [UTCsec4, mu_pos4, ub4, lb4] = EKFAllMeas(imufilenames{compidx}(1:end-5));
+% gtENUcomp = table2array(groundtruth(:,4));
+% 
+% figure;
+% subplot(2,2,1)
+% plot(gtENUcomp(:,1),gtENUcomp(:,2),'-ko')
+% hold on
+% plot(mu_pos1(1,:),mu_pos1(2,:),'-b')
+% axis equal
+% grid on
+% xlabel('E-axis (m)')
+% ylabel('N-axis (m)')
+% title('Kalman Filter, GPS Times Only')
+% 
+% subplot(2,2,2)
+% plot(gtENUcomp(:,1),gtENUcomp(:,2),'-ko')
+% hold on
+% plot(mu_pos2(1,:),mu_pos2(2,:),'-b')
+% axis equal
+% grid on
+% xlabel('E-axis (m)')
+% ylabel('N-axis (m)')
+% title('Kalman Filter, All Times')
+% 
+% subplot(2,2,3)
+% plot(gtENUcomp(:,1),gtENUcomp(:,2),'-ko')
+% hold on
+% plot(mu_pos3(1,:),mu_pos3(2,:),'-b')
+% axis equal
+% grid on
+% xlabel('E-axis (m)')
+% ylabel('N-axis (m)')
+% title('Extended Kalman Filter, GPS Times Only')
+% 
+% subplot(2,2,4)
+% plot(gtENUcomp(:,1),gtENUcomp(:,2),'-ko')
+% hold on
+% plot(mu_pos4(1,:),mu_pos4(2,:),'-b')
+% axis equal
+% grid on
+% xlabel('E-axis (m)')
+% ylabel('N-axis (m)')
+% title('Extended Kalman Filter, All Measurements')
 
 %% calc error
 
 pos_error = [];
 for i = 1:72
     imufile = imufilenames{i};
-    [UTCsec, mu_pos, ub, lb] = EKFGPSTimes(imufilenames{i}(1:end-5));
+    [UTCsec, mu_pos, ub, lb] = KFGPSTimes(imufilenames{i}(1:end-5));
 
     rte = 0;
     loc_char = imufile(9:11);
@@ -192,14 +192,11 @@ for i = 1:72
     end
     gtENU = table2array(groundtruth(:,rte));
 
+    t_GT = [UTCsec(1) UTCsec(floor(end/2)) UTCsec(end)];
+    gtE = interp1(t_GT,gtENU(:,1),UTCsec);
+    gtN = interp1(t_GT,gtENU(:,2),UTCsec);
 
-        t_GT = [UTCsec(1) UTCsec(floor(end/2)) UTCsec(end)];
-        gtE = interp1(t_GT,gtENU(:,1),UTCsec);
-        gtN = interp1(t_GT,gtENU(:,2),UTCsec);
-
-        pos_error{i,1} = {sqrt((gtE - mu_pos(1,:)).^2 +(gtN - mu_pos(2,:)).^2)};
-
-
+    pos_error{i,1} = {sqrt((gtE - mu_pos(1,:)).^2 +(gtN - mu_pos(2,:)).^2)};
 
 end
 

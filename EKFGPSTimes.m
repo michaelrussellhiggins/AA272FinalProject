@@ -1,9 +1,11 @@
 function [UTCsec, mu_pos, ub, lb] = EKFGPSTimes(fileheader)
 
-gpsdata = readtable(strcat('Data/GPSPositionDirect/', fileheader, '.csv'));
+gpsdata = readtable(strcat('Data/GPSPositionClip2/', fileheader, '.csv'));
 acceldata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 'accel');
 gyrodata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 'gyro');
 orientdata = readtable(strcat('Data/IMUReadings/', fileheader, '.xlsx'), 'Sheet', 'orientation');
+
+gpsdata = gpsdata(~(isnan(gpsdata.utc)),:);
 
 numGPS = size(gpsdata, 1);
 
