@@ -173,7 +173,7 @@ load 'ClipData/groundtruth.mat'
 pos_error = [];
 for i = 1:72
     imufile = imufilenames{i};
-    [UTCsec, mu_pos, ub, lb] = KFGPSTimes(imufilenames{i}(1:end-5));
+    [UTCsec, mu_pos, ub, lb] = KFAllMeas(imufilenames{i}(1:end-5));
 
     rte = 0;
     loc_char = imufile(9:11);
