@@ -8,7 +8,7 @@ clc
 gpsposfiles = dir('Data/GPSPositionDirect/*.csv');
 
 gpsfilenames = {gpsposfiles.name};
-fileidx = 72;
+fileidx = 25;
 gpsfile = gpsfilenames{fileidx};
 
 gpsdata = readtable(['Data/GPSPositionDirect/' gpsfile]);
